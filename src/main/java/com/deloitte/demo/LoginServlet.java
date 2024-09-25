@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static final String URL = "jdbc:mysql://localhost:3306/vaman";
-	private static final String USER = "root";
-	private static final String PASSWORD = "root";
+	private static final String DB_URL = "jdbc:mysql://localhost:3306/vaman";
+	private static final String DB_USER = "root";
+	private static final String DB_PASSWORD = "root";
 
 	// URL: http://localhost:8090/deloitte-servlet-demo/login
 
@@ -54,7 +54,40 @@ public class LoginServlet extends HttpServlet {
 
 	private boolean validateUser(String username, String password) {
 		boolean isValid = false;
-		// code 
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+
+			conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+
+			String sql = "SELECT * FROM app_users WHERE username = ? AND password = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, username);
+			pstmt.setString(2, password);
+
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				isValid = true;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (rs != null)
+					rs.close();
+				if (pstmt != null)
+					pstmt.close();
+				if (conn != null)
+					conn.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		return isValid;
 	}
 }
